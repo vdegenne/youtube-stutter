@@ -1,0 +1,8 @@
+{
+  "port": 37097,
+  "openStrategy": "tmux-vim",
+  "tmuxOptions": {
+    "session": ":"
+  },
+  "postExec": "wlrctl window focus cool-retro-term"
+}

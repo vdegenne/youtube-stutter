@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		// "lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"useDefineForClassFields": false,
+		"experimentalDecorators": true,
+		"types": [
+			"vite/client",
+			"lit",
+			"lit/decorators.js",
+			"material-shell",
+			"youtube"
+		]
+	},
+	"include": ["src/**/*.ts"]
+}
