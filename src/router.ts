@@ -1,16 +1,11 @@
 import {ReactiveController, state} from '@snar/lit';
 import {installRouter} from 'pwa-helpers';
-import {toast} from 'toastit';
-import {SessionInterface} from './session/session.js';
-import {store} from './store.js';
 import {app} from './app-shell/app-shell.js';
+import {Page} from './pages/index.js';
+import {store} from './store.js';
+import {videoController} from './youtube.js';
 
-export enum Page {
-	HOME,
-	SESSION,
-}
-
-class Router extends ReactiveController {
+export class Router extends ReactiveController {
 	@state() page: Page = Page.HOME;
 
 	@state() id: number | undefined = undefined;
@@ -34,6 +29,7 @@ class Router extends ReactiveController {
 		super();
 		installRouter((location) => {
 			this.navigateComplete = new Promise<void>(async (resolve) => {
+				await store.updateComplete;
 				const hash = location.hash.slice(1);
 				if (hash) {
 					const params = new URLSearchParams(hash);
@@ -47,12 +43,14 @@ class Router extends ReactiveController {
 						}
 					}
 					this.page = Page.SESSION;
+					videoController.session = store.getSessionWithId(this.id);
 					await import('./pages/session-page.js');
 					// await app.sessionPage.updateComplete
-					app.sessionPage.loadSession(store.getSessionWithId(this.id));
+					// app.sessionPage.loadSession(store.getSessionWithId(this.id));
 				} else {
 					this.page = Page.HOME;
 					import('./pages/home-page.js');
+					app.sessionPage?.youtubeVideo.pause();
 				}
 				resolve();
 			});

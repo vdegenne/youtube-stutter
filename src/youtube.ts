@@ -1,7 +1,8 @@
-import {ReactiveController} from '@snar/lit';
-import {html, LitElement, render} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators.js';
-import {type PropertyValues} from 'snar';
+import {ReactiveController, withController} from '@snar/lit';
+import {html, LitElement, PropertyValues} from 'lit';
+import {customElement, query} from 'lit/decorators.js';
+import {state} from 'snar';
+import {type Session} from './session/session.js';
 import toast from 'toastit';
 
 declare global {
@@ -33,20 +34,27 @@ export enum PlayerState {
 	CUED = 5, // YT.PlayerState.CUED,
 }
 
-class YouTubeVideoController extends ReactiveController {
+class VideoController extends ReactiveController {
+	@state() session: Session | undefined = undefined;
 	@state() state: PlayerState = PlayerState.UNLOADED;
 }
-export const videoController = new YouTubeVideoController();
+export const videoController = new VideoController();
 
 @customElement('youtube-video')
+@withController(videoController)
 export class YouTubeVideo extends LitElement {
 	/**
 	 * Id of the YouTube video.
 	 */
-	@property({reflect: true}) videoId: string | undefined = undefined;
+	@state() videoId: string | undefined = undefined;
 
 	#player: YT.Player;
 	@query('#player') playerElement!: HTMLDivElement;
+
+	protected update(changedProperties: PropertyValues): void {
+		this.videoId = videoController.session.youtubeVideoId;
+		super.update(changedProperties);
+	}
 
 	async updated(changed: PropertyValues<this>) {
 		if (changed.has('videoId') && this.videoId !== undefined) {
@@ -72,6 +80,7 @@ export class YouTubeVideo extends LitElement {
 						videoController.state = YT.PlayerState.UNSTARTED;
 					},
 					onStateChange: (event) => {
+						toast(event.data, {leading: true});
 						videoController.state = event.data;
 					},
 				},
@@ -98,6 +107,13 @@ export class YouTubeVideo extends LitElement {
 		}
 	}
 
+	get currentTime() {
+		return this.#player.getCurrentTime();
+	}
+	set currentTime(seconds: number) {
+		this.#player.seekTo(seconds, true);
+	}
+
 	render() {
 		return html`<!-- -->
 			<div id="player-wrapper" style="height:100%;">
@@ -111,3 +127,5 @@ export class YouTubeVideo extends LitElement {
 			'<div id=player></div>';
 	}
 }
+
+export const youtubeVideo = new YouTubeVideo();

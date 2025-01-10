@@ -1,12 +1,13 @@
-import {withController} from '@snar/lit';
-import {LitElement, html} from 'lit';
+import {LitElement, PropertyValues, html} from 'lit';
 import {withStyles} from 'lit-with-styles';
 import {customElement, query} from 'lit/decorators.js';
 import {materialShellLoadingOff} from 'material-shell';
-import {Page, router} from '../router.js';
+import {type Router} from '../router.js';
 import styles from './app-shell.css?inline';
 import {type HomePage} from '../pages/home-page.js';
 import {type SessionPage} from '../pages/session-page.js';
+import {getRouter} from '../imports.js';
+import {Page} from '../pages/index.js';
 
 declare global {
 	interface Window {
@@ -19,20 +20,36 @@ declare global {
 
 @customElement('app-shell')
 @withStyles(styles)
-@withController(router)
+// @withController(router)
 export class AppShell extends LitElement {
 	@query('home-page') homePage!: HomePage;
 	@query('session-page') sessionPage!: SessionPage;
 	// @query('[active]') activePage!: HomePage | SessionPage;
 
-	firstUpdated() {
+	#router: Router;
+	constructor() {
+		super();
+		getRouter().then((router) => {
+			this.#router = router;
+			this.#router.bind(this);
+			this.requestUpdate();
+		});
+	}
+
+	async firstUpdated() {
 		materialShellLoadingOff.call(this);
+	}
+
+	protected shouldUpdate(_changedProperties: PropertyValues): boolean {
+		return !!this.#router;
 	}
 
 	render() {
 		return html`<!-- -->
-			<home-page ?active=${router.page === Page.HOME}></home-page>
-			<session-page ?active=${router.page === Page.SESSION}></session-page>
+			<home-page ?active=${this.#router.page === Page.HOME}></home-page>
+			<session-page
+				?active=${this.#router.page === Page.SESSION}
+			></session-page>
 			<!-- -->`;
 	}
 }

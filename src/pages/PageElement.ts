@@ -7,6 +7,7 @@ export class PageElement extends LitElement {
 	static styles = css`
 		:host {
 			display: flex;
+			flex-direction: column;
 			position: absolute;
 			inset: 0;
 		}

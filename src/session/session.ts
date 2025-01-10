@@ -1,5 +1,7 @@
 import {ReactiveController} from '@snar/lit';
 import {state} from 'lit/decorators.js';
+import {store} from '../store.js';
+import {type PropertyValues} from 'snar';
 
 export interface SessionInterface {
 	youtubeVideoId: string;
@@ -14,7 +16,7 @@ export class Session
 	extends ReactiveController<SessionInterface>
 	implements SessionInterface
 {
-	id: number | undefined = undefined;
+	@state() id: number | null = null;
 	@state() youtubeVideoId = '';
 	@state() name = '';
 	@state() innerPauseS = 4;
@@ -23,6 +25,6 @@ export class Session
 	@state() pauseBetweenRepeatsS = 3;
 
 	updated() {
-		// TODO: when something changes we should save to the store.
+		store.requestUpdate();
 	}
 }

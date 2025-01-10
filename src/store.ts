@@ -1,11 +1,26 @@
 import {ReactiveController, state} from '@snar/lit';
-import {type Session} from './session/session.js';
+import {Session} from './session/session.js';
 import toast from 'toastit';
-// import { saveToLocalStorage } from "snar-save-to-local-storage";
+import {saveToLocalStorage} from 'snar-save-to-local-storage';
+import {type PropertyValues} from 'lit';
 
-// @saveToLocalStorage('something')
+declare global {
+	interface Window {
+		store: AppStore;
+	}
+}
+
+@saveToLocalStorage('youtube-stutter:store')
 export class AppStore extends ReactiveController {
 	@state() sessions: Session[] = [];
+
+	update(changed: PropertyValues<this>) {
+		if (this.sessions.length > 0 && !(this.sessions[0] instanceof Session)) {
+			this.sessions = this.sessions.map(
+				(session) => new Session(null, session),
+			);
+		}
+	}
 
 	getSessionWithId(id: number) {
 		return this.sessions.find((s) => s.id === id);
@@ -21,7 +36,7 @@ export class AppStore extends ReactiveController {
 	}
 
 	addSession(session: Session) {
-		if (session.id === undefined) {
+		if (session.id === null) {
 			session.id = this.getNextId();
 		}
 		if (this.getSessionWithId(session.id)) {
@@ -29,7 +44,6 @@ export class AppStore extends ReactiveController {
 			return; // can't add a session that exist
 		}
 		this.sessions = [...this.sessions, session];
-		this.sessions.push(session);
 		return session;
 	}
 	removeSession(session: Session) {
@@ -43,4 +57,4 @@ export class AppStore extends ReactiveController {
 	}
 }
 
-export const store = new AppStore();
+export const store = (window.store = new AppStore());

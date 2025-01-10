@@ -5,14 +5,22 @@ import toast from 'toastit';
 import {PageElement} from './PageElement.js';
 import {store} from '../store.js';
 import {Session} from '../session/session.js';
-import {router} from '../router.js';
+import {getRouter, getSessionDialog} from '../imports.js';
 
 @customElement('home-page')
 @withStyles()
 export class HomePage extends PageElement {
 	render() {
 		return html`<!-- -->
-			WELCOME
+			<md-list
+				>${store.sessions.map((session) => {
+					return html`<!-- -->
+						<md-list-item href="#id=${session.id}">
+							<span>${session.youtubeVideoId}</span>
+						</md-list-item>
+						<!-- -->`;
+				})}</md-list
+			>
 			<md-fab
 				size="large"
 				class="absolute bottom-12 right-12"
@@ -25,13 +33,14 @@ export class HomePage extends PageElement {
 
 	async #addSession() {
 		try {
-			const {SessionDialog} = await import('../session/session-dialog.js');
+			const {SessionDialog} = await getSessionDialog();
 			const dialog = new SessionDialog();
 			let sessionObj = new Session();
 			const modified = await dialog.show(sessionObj);
 			sessionObj.youtubeVideoId = modified.youtubeVideoId;
 			sessionObj.name = modified.name;
 			store.addSession(sessionObj);
+			const router = await getRouter();
 			router.goToSession(sessionObj.id);
 		} catch (error) {
 			console.log(error);

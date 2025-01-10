@@ -43,6 +43,7 @@ export class SessionDialog extends LitElement {
 
 		return html`<!-- -->
 			<md-dialog
+				quick
 				?open="${this.open}"
 				@opened=${() => {
 					this.renderRoot.querySelector<HTMLElement>('[autofocus]')?.focus();

@@ -1,54 +1,43 @@
+import {withController} from '@snar/lit';
 import {css, html} from 'lit';
 import {withStyles} from 'lit-with-styles';
-import {customElement, query, state} from 'lit/decorators.js';
+import {customElement} from 'lit/decorators.js';
+import {PlayerState, videoController, youtubeVideo} from '../youtube.js';
 import {PageElement} from './PageElement.js';
-import {type Session} from '../session/session.js';
-import '../youtube.ts';
-import {withController} from '@snar/lit';
-import {PlayerState, videoController, YouTubeVideo} from '../youtube.js';
+import {loopController} from '../loop-controller.js';
+import {getSessionSettingsDialog} from '../imports.js';
+import {loopUIComponent} from '../loop-ui-component.js';
 
 @customElement('session-page')
 @withStyles(css`
 	md-fab[inert] {
-		opacity: 0.5;
+		opacity: 0.3;
 	}
 `)
 @withController(videoController)
+@withController(loopController)
 export class SessionPage extends PageElement {
-	@state() session: Session | undefined = undefined;
-
-	@query('youtube-video') youtubeVideo!: YouTubeVideo;
-
-	loadSession(session: Session) {
-		this.session = session;
-	}
-
-	shouldUpdate() {
-		return !!this.session;
-	}
-
 	render() {
 		const disabledActions =
 			videoController.state === PlayerState.UNLOADED ||
 			videoController.state === PlayerState.BUFFERING;
 
-		console.log(window.YT, videoController.state);
-
 		return html`<!-- -->
-			<div class="w-full flex flex-col">
-				<youtube-video
-					class="flex-1"
-					.videoId=${this.session.youtubeVideoId}
-				></youtube-video>
-
-				<div id="actions" class="flex justify-between items-center m-4">
-					<md-fab ?inert=${disabledActions}>
-						<md-icon slot="icon">fast_rewind</md-icon>
-					</md-fab>
+			<div
+				class="flex-1 ${loopController.isRunning ? 'pointer-events-none' : ''}"
+			>
+				${youtubeVideo}
+			</div>
+			<div id="actions" class="flex justify-between items-center m-4">
+				<md-fab ?inert=${false} invisible>
+					<md-icon slot="icon">fast_rewind</md-icon>
+				</md-fab>
+				<div class="flex items-center gap-3">
+					${loopUIComponent}
 					<md-fab
-						?inert=${disabledActions}
+						?inert=${!window.YT}
 						style="--md-fab-icon-size:38px"
-						@click=${() => this.youtubeVideo.toggle()}
+						@click=${() => loopController.toggle()}
 					>
 						${window.YT === undefined
 							? html`<!-- -->
@@ -57,20 +46,26 @@ export class SessionPage extends PageElement {
 										slot="icon"
 									></md-circular-progress>
 									<!-- -->`
-							: videoController.state === PlayerState.UNSTARTED ||
-								  videoController.state === PlayerState.PAUSED
+							: !loopController.isRunning
 								? html`<!-- -->
 										<md-icon slot="icon">play_arrow</md-icon>
 										<!-- -->`
 								: html`<!-- -->
+										<!-- <md-icon slot="icon">stop_circle</md-icon> -->
 										<md-icon slot="icon">pause</md-icon>
 										<!-- -->`}
 						}
 					</md-fab>
-					<md-fab ?inert=${disabledActions}>
-						<md-icon slot="icon">fast_forward</md-icon>
+					<md-fab
+						?inert=${loopController.isRunning}
+						@click=${async () => (await getSessionSettingsDialog()).show()}
+					>
+						<md-icon slot="icon">settings</md-icon>
 					</md-fab>
 				</div>
+				<md-fab ?inert=${false} invisible>
+					<md-icon slot="icon">fast_forward</md-icon>
+				</md-fab>
 			</div>
 			<!-- -->`;
 	}
