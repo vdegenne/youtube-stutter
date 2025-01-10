@@ -80,7 +80,7 @@ export class YouTubeVideo extends LitElement {
 						videoController.state = YT.PlayerState.UNSTARTED;
 					},
 					onStateChange: (event) => {
-						toast(event.data, {leading: true});
+						// toast(event.data, {leading: true});
 						videoController.state = event.data;
 					},
 				},

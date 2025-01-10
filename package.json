@@ -49,9 +49,7 @@
 			]
 		},
 		"build": {
-			"command": "vite build",
-			"files": [],
-			"output": []
+			"command": "vite build"
 		},
 		"dev:vuc": {
 			"service": true,

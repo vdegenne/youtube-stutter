@@ -19,10 +19,10 @@ export class Session
 	@state() id: number | null = null;
 	@state() youtubeVideoId = '';
 	@state() name = '';
-	@state() innerPauseS = 4;
-	@state() repeatEveryS = 3;
-	@state() numberOfRepeats = 2;
+	@state() repeatEveryS = 5;
 	@state() pauseBetweenRepeatsS = 3;
+	@state() numberOfRepeats = 2;
+	@state() innerPauseS = 5;
 
 	updated() {
 		store.requestUpdate();
